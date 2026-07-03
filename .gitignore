@@ -1,0 +1,5 @@
+.env
+data/poll.db
+.vscode/
+.idea/
+*.log
