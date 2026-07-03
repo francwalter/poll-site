@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/i18n.php';
 
 Auth::requireLogin();
 
@@ -11,11 +12,11 @@ $search = $_GET['search'] ?? '';
 $page = intval($_GET['page'] ?? 1);
 const ITEMS_PER_PAGE = 50;
 
-$whereClause = 'WHERE poll_id = ?';
+$whereClause = 'WHERE poll_id = :poll_id';
 $params = [':poll_id' => $pollId];
 
 if (!empty($search)) {
-    $whereClause .= ' AND (name LIKE ? OR email LIKE ?)';
+    $whereClause .= ' AND (name LIKE :search1 OR email LIKE :search2)';
     $searchTerm = '%' . $search . '%';
     $params[':search1'] = $searchTerm;
     $params[':search2'] = $searchTerm;
@@ -27,7 +28,7 @@ $totalPages = ceil($totalCount / ITEMS_PER_PAGE);
 $offset = ($page - 1) * ITEMS_PER_PAGE;
 
 $archived = $db->queryAll(
-    "SELECT * FROM archived_entries $whereClause ORDER BY archived_at DESC LIMIT ? OFFSET ?",
+    "SELECT * FROM archived_entries $whereClause ORDER BY archived_at DESC LIMIT :limit OFFSET :offset",
     array_merge($params, [':limit' => ITEMS_PER_PAGE, ':offset' => $offset])
 );
 ?>
@@ -53,16 +54,23 @@ $archived = $db->queryAll(
     </nav>
 
     <div class="container mt-5">
-        <h1>Poll History</h1>
+        <h1><?php echo translate('poll_history'); ?></h1>
         <form method="GET" class="mb-4">
+            <input type="hidden" name="id" value="<?php echo htmlspecialchars($pollId); ?>">
             <div class="row">
-                <div class="col-md-8"><input type="text" class="form-control" name="search" placeholder="Search..." value="<?php echo htmlspecialchars($search); ?>"></div>
-                <div class="col-md-4"><button type="submit" class="btn btn-primary w-100">Search</button></div>
+                <div class="col-md-8"><input type="text" class="form-control" name="search" placeholder="<?php echo translate('search'); ?>..." value="<?php echo htmlspecialchars($search); ?>"></div>
+                <div class="col-md-4"><button type="submit" class="btn btn-primary w-100"><?php echo translate('search'); ?></button></div>
             </div>
         </form>
         <table class="table table-striped">
             <thead>
-                <tr><th>Name</th><th>Email</th><th>Cycle</th><th>Joined</th><th>Archived</th></tr>
+                <tr>
+                    <th><?php echo translate('name'); ?></th>
+                    <th><?php echo translate('email'); ?></th>
+                    <th><?php echo translate('cycle'); ?></th>
+                    <th><?php echo translate('joined'); ?></th>
+                    <th><?php echo translate('archived'); ?></th>
+                </tr>
             </thead>
             <tbody>
                 <?php foreach ($archived as $entry): ?>
@@ -77,8 +85,12 @@ $archived = $db->queryAll(
             </tbody>
         </table>
     </div>
-    <div class="position-fixed top-0 end-0 p-3">
-        <button id="themeToggle" class="btn btn-outline-secondary" onclick="toggleTheme()">🌙 Dark Mode</button>
+    <div class="position-fixed top-0 start-0 p-3">
+        <a href="<?php echo BASE_PATH; ?>/set_language.php?lang=en" class="btn btn-sm btn-outline-secondary">EN</a>
+        <a href="<?php echo BASE_PATH; ?>/set_language.php?lang=de" class="btn btn-sm btn-outline-secondary">DE</a>
+    </div>
+    <div class="position-fixed bottom-0 end-0 p-3">
+        <button id="themeToggle" class="btn btn-sm btn-outline-secondary" onclick="toggleTheme()"><?php echo translate('dark_mode'); ?></button>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>

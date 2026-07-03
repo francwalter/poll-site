@@ -3,6 +3,7 @@ require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/security.php';
+require_once __DIR__ . '/../includes/i18n.php';
 
 Auth::requireLogin();
 
@@ -58,19 +59,19 @@ $csrfToken = Security::generateCSRFToken();
             <div class="col-lg-8">
                 <div class="card">
                     <div class="card-header">
-                        <h5>Entries (<?php echo count($entries); ?>)</h5>
+                        <h5><?php echo translate('entries'); ?> (<?php echo count($entries); ?>)</h5>
                     </div>
                     <div class="card-body">
                         <?php if (empty($entries)): ?>
-                            <p class="text-muted">No entries</p>
+                            <p class="text-muted"><?php echo translate('no_entries'); ?></p>
                         <?php else: ?>
                             <table class="table table-striped">
                                 <thead>
                                     <tr>
-                                        <th>Name</th>
-                                        <th>Email</th>
-                                        <th>Joined</th>
-                                        <th>Actions</th>
+                                        <th><?php echo translate('name'); ?></th>
+                                        <th><?php echo translate('email'); ?></th>
+                                        <th><?php echo translate('joined'); ?></th>
+                                        <th><?php echo translate('actions'); ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -80,11 +81,11 @@ $csrfToken = Security::generateCSRFToken();
                                         <td><?php echo htmlspecialchars($entry['email'] ?? '-'); ?></td>
                                         <td><?php echo date('M d, Y', strtotime($entry['created_at'])); ?></td>
                                         <td>
-                                            <a href="<?php echo BASE_PATH; ?>/admin/edit.php?id=<?php echo $entry['id']; ?>" class="btn btn-sm btn-primary">Edit</a>
+                                            <a href="<?php echo BASE_PATH; ?>/admin/edit.php?id=<?php echo $entry['id']; ?>" class="btn btn-sm btn-primary"><?php echo translate('edit'); ?></a>
                                             <form method="POST" action="<?php echo BASE_PATH; ?>/api/delete_entry.php" style="display:inline;">
                                                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
                                                 <input type="hidden" name="entry_id" value="<?php echo $entry['id']; ?>">
-                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete?')">Delete</button>
+                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('<?php echo translate('confirm_delete'); ?>?')"><?php echo translate('delete'); ?></button>
                                             </form>
                                         </td>
                                     </tr>
@@ -98,18 +99,22 @@ $csrfToken = Security::generateCSRFToken();
 
             <div class="col-lg-4">
                 <div class="card">
-                    <div class="card-header"><h5>Settings</h5></div>
+                    <div class="card-header"><h5><?php echo translate('settings'); ?></h5></div>
                     <div class="card-body">
-                        <p><strong>Clear Date:</strong> <?php echo htmlspecialchars($poll['next_clear_date']); ?></p>
-                        <p><strong>Interval:</strong> <?php echo $poll['recurring_interval_days']; ?> days</p>
-                        <a href="<?php echo BASE_PATH; ?>/admin/settings.php" class="btn btn-secondary w-100">Edit</a>
+                        <p><strong><?php echo translate('clear_date'); ?>:</strong> <?php echo htmlspecialchars($poll['next_clear_date']); ?></p>
+                        <p><strong><?php echo translate('interval'); ?>:</strong> <?php echo $poll['recurring_interval_days']; ?> <?php echo translate('days'); ?></p>
+                        <a href="<?php echo BASE_PATH; ?>/admin/settings.php" class="btn btn-secondary w-100"><?php echo translate('edit'); ?></a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="position-fixed top-0 end-0 p-3">
-        <button id="themeToggle" class="btn btn-outline-secondary" onclick="toggleTheme()">🌙 Dark Mode</button>
+    <div class="position-fixed top-0 start-0 p-3">
+        <a href="<?php echo BASE_PATH; ?>/set_language.php?lang=en" class="btn btn-sm btn-outline-secondary">EN</a>
+        <a href="<?php echo BASE_PATH; ?>/set_language.php?lang=de" class="btn btn-sm btn-outline-secondary">DE</a>
+    </div>
+    <div class="position-fixed bottom-0 end-0 p-3">
+        <button id="themeToggle" class="btn btn-sm btn-outline-secondary" onclick="toggleTheme()"><?php echo translate('dark_mode'); ?></button>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
