@@ -9,7 +9,64 @@ class EmailService {
         $headers .= "Content-type: " . ($isHtml ? "text/html" : "text/plain") . "; charset=UTF-8\r\n";
         $headers .= "From: " . SMTP_FROM_NAME . " <" . SMTP_FROM . ">\r\n";
         
-        return mail($to, $subject, $body, $headers);
+        if (EMAIL_TYPE === 'smtp') {
+            return self::sendViaSMTP($to, $subject, $body, $headers);
+        } else {
+            return mail($to, $subject, $body, $headers);
+        }
+    }
+    
+    private static function sendViaSMTP($to, $subject, $body, $headers) {
+        try {
+            $connection = fsockopen(SMTP_HOST, SMTP_PORT, $errno, $errstr, 30);
+            if (!$connection) {
+                return false;
+            }
+            
+            $out = "EHLO " . $_SERVER['HTTP_HOST'] . "\r\n";
+            fwrite($connection, $out);
+            $response = fgets($connection, 1024);
+            
+            $out = "AUTH LOGIN\r\n";
+            fwrite($connection, $out);
+            fgets($connection, 1024);
+            
+            $out = base64_encode(SMTP_USER) . "\r\n";
+            fwrite($connection, $out);
+            fgets($connection, 1024);
+            
+            $out = base64_encode(SMTP_PASSWORD) . "\r\n";
+            fwrite($connection, $out);
+            fgets($connection, 1024);
+            
+            $out = "MAIL FROM:<" . SMTP_FROM . ">\r\n";
+            fwrite($connection, $out);
+            fgets($connection, 1024);
+            
+            $out = "RCPT TO:<" . $to . ">\r\n";
+            fwrite($connection, $out);
+            fgets($connection, 1024);
+            
+            $out = "DATA\r\n";
+            fwrite($connection, $out);
+            fgets($connection, 1024);
+            
+            $message = "To: " . $to . "\r\n";
+            $message .= "Subject: " . $subject . "\r\n";
+            $message .= $headers . "\r\n";
+            $message .= $body . "\r\n.\r\n";
+            
+            fwrite($connection, $message);
+            fgets($connection, 1024);
+            
+            $out = "QUIT\r\n";
+            fwrite($connection, $out);
+            fclose($connection);
+            
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
     }
     
     public static function notifySubscribers($pollId, $newEntry) {

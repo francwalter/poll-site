@@ -23,11 +23,20 @@ define('APP_ROOT', dirname(__DIR__));
 define('DB_PATH', getenv('DB_PATH') ?: APP_ROOT . '/data/poll.db');
 define('ADMIN_USERNAME', getenv('ADMIN_USERNAME') ?: 'admin');
 define('ADMIN_PASSWORD_HASH', getenv('ADMIN_PASSWORD_HASH'));
+
+// Email Configuration
+define('EMAIL_TYPE', getenv('EMAIL_TYPE') ?: 'sendmail');
 define('SMTP_ENABLED', getenv('SMTP_ENABLED') === 'true');
-define('SMTP_HOST', getenv('SMTP_HOST'));
-define('SMTP_PORT', getenv('SMTP_PORT') ?: 587);
 define('SMTP_FROM', getenv('SMTP_FROM'));
 define('SMTP_FROM_NAME', getenv('SMTP_FROM_NAME') ?: 'Poll Site');
+
+// SMTP Provider settings (only used if EMAIL_TYPE=smtp)
+define('SMTP_HOST', getenv('SMTP_HOST'));
+define('SMTP_PORT', getenv('SMTP_PORT') ?: 587);
+define('SMTP_USER', getenv('SMTP_USER'));
+define('SMTP_PASSWORD', getenv('SMTP_PASSWORD'));
+
+// Site Configuration
 define('SITE_TITLE', getenv('SITE_TITLE') ?: 'Poll Site');
 define('SITE_URL', getenv('SITE_URL') ?: 'http://localhost/poll');
 define('DEBUG', getenv('DEBUG') === 'true');
