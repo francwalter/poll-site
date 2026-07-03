@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
     if (Auth::login($username, $password)) {
-        header('Location: /admin/dashboard.php');
+        header('Location: ' . BASE_PATH . '/admin/dashboard.php');
         exit();
     } else {
         $error = 'Invalid credentials';
@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if (Auth::isLoggedIn()) {
-    header('Location: /admin/dashboard.php');
+    header('Location: ' . BASE_PATH . '/admin/dashboard.php');
     exit();
 }
 
