@@ -20,6 +20,25 @@ function load_env_file($file = '.env') {
 load_env_file(__DIR__ . '/../.env');
 
 define('APP_ROOT', dirname(__DIR__));
+
+// Auto-detect BASE_PATH for subdirectory installations
+// Set BASE_PATH in .env to override (e.g., BASE_PATH=/poll-site)
+if (!defined('BASE_PATH')) {
+    $basePath = getenv('BASE_PATH');
+    if (!$basePath) {
+        // Auto-detect: get the directory between domain and current script
+        $scriptPath = dirname($_SERVER['SCRIPT_NAME']);
+        // Remove trailing slash if present
+        $basePath = rtrim($scriptPath, '/');
+        // If we're in /poll-site/admin, this will be /poll-site
+        // If we're in /admin, this will be empty string
+        if ($basePath === '/includes' || $basePath === '/admin' || $basePath === '/api') {
+            $basePath = dirname($basePath);
+        }
+    }
+    define('BASE_PATH', $basePath ?: '');
+}
+
 define('DB_PATH', getenv('DB_PATH') ?: APP_ROOT . '/data/poll.db');
 define('ADMIN_USERNAME', getenv('ADMIN_USERNAME') ?: 'admin');
 define('ADMIN_PASSWORD_HASH', getenv('ADMIN_PASSWORD_HASH'));
