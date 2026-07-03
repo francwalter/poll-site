@@ -25,7 +25,7 @@ $csrfToken = Security::generateCSRFToken();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($poll['title']); ?> - Poll Site</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/assets/css/style.css">
 </head>
 <body>
     <div class="container mt-5">
@@ -45,7 +45,7 @@ $csrfToken = Security::generateCSRFToken();
                         <h5>Join the Poll</h5>
                     </div>
                     <div class="card-body">
-                        <form id="addEntryForm" method="POST" action="/api/add_entry.php">
+                        <form id="addEntryForm" method="POST" action="<?php echo BASE_PATH; ?>/api/add_entry.php">
                             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
                             <input type="hidden" name="poll_id" value="<?php echo $pollId; ?>">
                             
@@ -91,11 +91,14 @@ $csrfToken = Security::generateCSRFToken();
         </div>
     </div>
 
-    <div class="position-fixed bottom-0 end-0 p-3">
+    <div class="position-fixed top-0 end-0 p-3">
         <button id="themeToggle" class="btn btn-outline-secondary" onclick="toggleTheme()">🌙 Dark Mode</button>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/assets/js/script.js"></script>
+    <script>
+        window.BASE_PATH = <?php echo json_encode(BASE_PATH); ?>;
+    </script>
+    <script src="<?php echo BASE_PATH; ?>/assets/js/script.js"></script>
 </body>
 </html>

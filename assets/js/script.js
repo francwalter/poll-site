@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             const formData = new FormData(form);
-            fetch('/api/add_entry.php', { method: 'POST', body: formData })
+            fetch((window.BASE_PATH || '') + '/api/add_entry.php', { method: 'POST', body: formData })
                 .then(r => r.json())
                 .then(d => {
                     if (d.success) {

@@ -28,18 +28,23 @@ if (!defined('BASE_PATH')) {
     if (!$basePath) {
         // Auto-detect: get the directory between domain and current script
         $scriptPath = dirname($_SERVER['SCRIPT_NAME']);
+        // Normalize slashes
+        $scriptPath = str_replace('\\', '/', $scriptPath);
         // Remove trailing slash if present
         $basePath = rtrim($scriptPath, '/');
-        // If we're in /poll-site/admin, this will be /poll-site
-        // If we're in /admin, this will be empty string
-        if ($basePath === '/includes' || $basePath === '/admin' || $basePath === '/api') {
-            $basePath = dirname($basePath);
+        // If the path ends with /includes, /admin, or /api, strip that subdirectory to get the project root
+        if (preg_match('#/(includes|admin|api)$#', $basePath, $matches)) {
+            $basePath = substr($basePath, 0, -strlen($matches[0]));
         }
     }
     define('BASE_PATH', $basePath ?: '');
 }
 
-define('DB_PATH', getenv('DB_PATH') ?: APP_ROOT . '/data/poll.db');
+$dbPath = getenv('DB_PATH') ?: APP_ROOT . '/data/poll.db';
+if (substr($dbPath, 0, 1) === '.' || (strpos($dbPath, '/') !== 0 && strpos($dbPath, ':') !== 1)) {
+    $dbPath = APP_ROOT . '/' . ltrim($dbPath, './\\');
+}
+define('DB_PATH', $dbPath);
 define('ADMIN_USERNAME', getenv('ADMIN_USERNAME') ?: 'admin');
 define('ADMIN_PASSWORD_HASH', getenv('ADMIN_PASSWORD_HASH'));
 

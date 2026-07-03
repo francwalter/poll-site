@@ -27,21 +27,31 @@ $csrfToken = Security::generateCSRFToken();
     <meta charset="UTF-8">
     <title>Admin Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/assets/css/style.css">
 </head>
 <body>
     <nav class="navbar navbar-dark bg-dark">
         <div class="container">
-            <span class="navbar-brand">Poll Admin</span>
-            <ul class="navbar-nav ms-auto flex-row">
-                <li class="nav-item"><a class="nav-link" href="<?php echo BASE_PATH; ?>/admin/settings.php">Settings</a></li>
-                <li class="nav-item"><a class="nav-link" href="<?php echo BASE_PATH; ?>/admin/history.php">History</a></li>
-                <li class="nav-item"><a class="nav-link" href="<?php echo BASE_PATH; ?>/admin/logout.php">Logout</a></li>
-            </ul>
+            <a class="navbar-brand" href="<?php echo BASE_PATH; ?>/admin/dashboard.php">Poll Admin</a>
+            <div class="d-flex">
+                <a class="btn btn-outline-light me-2" href="<?php echo BASE_PATH; ?>/admin/dashboard.php">Dashboard</a>
+                <a class="btn btn-outline-light me-2" href="<?php echo BASE_PATH; ?>/admin/settings.php">Settings</a>
+                <a class="btn btn-outline-light me-2" href="<?php echo BASE_PATH; ?>/admin/history.php">History</a>
+                <a class="btn btn-outline-danger" href="<?php echo BASE_PATH; ?>/admin/logout.php">Logout</a>
+            </div>
         </div>
     </nav>
 
     <div class="container mt-5">
-        <h1><?php echo htmlspecialchars($poll['title']); ?></h1>
+        <h1>
+            <a href="<?php echo BASE_PATH ?: '/'; ?>/?id=<?php echo $poll['id']; ?>" target="_blank" class="text-decoration-none d-inline-flex align-items-center dashboard-poll-link">
+                <?php echo htmlspecialchars($poll['title']); ?>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-box-arrow-up-right ms-2 text-secondary" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
+                    <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
+                </svg>
+            </a>
+        </h1>
         <p class="text-muted"><?php echo htmlspecialchars($poll['description'] ?? ''); ?></p>
 
         <div class="row mt-4">
@@ -98,5 +108,13 @@ $csrfToken = Security::generateCSRFToken();
             </div>
         </div>
     </div>
+    <div class="position-fixed top-0 end-0 p-3">
+        <button id="themeToggle" class="btn btn-outline-secondary" onclick="toggleTheme()">🌙 Dark Mode</button>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        window.BASE_PATH = <?php echo json_encode(BASE_PATH); ?>;
+    </script>
+    <script src="<?php echo BASE_PATH; ?>/assets/js/script.js"></script>
 </body>
 </html>

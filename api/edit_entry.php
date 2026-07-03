@@ -42,5 +42,5 @@ $db->query(
     [':name' => $name, ':email' => !empty($email) ? $email : null, ':id' => $entryId]
 );
 
-header('Location: /admin/dashboard.php?id=' . $entry['poll_id']);
+header('Location: ' . BASE_PATH . '/admin/dashboard.php?id=' . $entry['poll_id']);
 exit();

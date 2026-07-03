@@ -62,14 +62,36 @@ class Database {
             archived_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             poll_cycle TEXT NOT NULL
         )');
+
+        // Auto-seed a default poll if the table is empty
+        $count = $this->db->querySingle('SELECT COUNT(*) FROM polls');
+        if ($count === 0) {
+            $nextWeek = date('Y-m-d', strtotime('+7 days'));
+            $stmt = $this->db->prepare('INSERT INTO polls (id, title, description, next_clear_date, recurring_interval_days, is_active) VALUES (1, ?, ?, ?, 7, 1)');
+            $stmt->bindValue(1, 'Weekly Lunch Poll');
+            $stmt->bindValue(2, 'Welcome to the weekly recurring lunch poll. Enter your name to participate!');
+            $stmt->bindValue(3, $nextWeek);
+            $stmt->execute();
+        }
     }
     
     public function query($sql, $params = []) {
         try {
             $stmt = $this->db->prepare($sql);
             if ($params) {
+                $hasPositionalPlaceholders = (strpos($sql, '?') !== false);
+                $isNamedArray = false;
+                foreach (array_keys($params) as $k) {
+                    if (is_string($k)) {
+                        $isNamedArray = true;
+                        break;
+                    }
+                }
+
+                $i = 1;
                 foreach ($params as $key => $value) {
-                    $stmt->bindValue($key, $value, is_int($value) ? SQLITE3_INTEGER : SQLITE3_TEXT);
+                    $bindKey = ($hasPositionalPlaceholders && $isNamedArray) ? $i++ : $key;
+                    $stmt->bindValue($bindKey, $value, is_int($value) ? SQLITE3_INTEGER : SQLITE3_TEXT);
                 }
             }
             return $stmt->execute();
