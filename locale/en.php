@@ -35,5 +35,13 @@ return [
     'search' => 'Search',
     'cycle' => 'Cycle',
     'archived' => 'Archived',
+    'change_password' => 'Change Password',
+    'current_password' => 'Current Password',
+    'new_password' => 'New Password',
+    'update_password' => 'Update Password',
+    'password_updated_successfully' => 'Password updated successfully.',
+    'error_updating_password' => 'Error updating password.',
+    'error_env_file_not_found' => 'Error: .env file not found.',
+    'incorrect_current_password' => 'Incorrect current password.',
     // Add more English translations as needed
 ];

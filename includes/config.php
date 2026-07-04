@@ -46,7 +46,11 @@ if (substr($dbPath, 0, 1) === '.' || (strpos($dbPath, '/') !== 0 && strpos($dbPa
 }
 define('DB_PATH', $dbPath);
 define('ADMIN_USERNAME', getenv('ADMIN_USERNAME') ?: 'admin');
-define('ADMIN_PASSWORD_HASH', getenv('ADMIN_PASSWORD_HASH'));
+
+function getAdminPasswordHash() {
+    load_env_file(__DIR__ . '/../.env');
+    return getenv('ADMIN_PASSWORD_HASH');
+}
 
 // Email Configuration
 define('EMAIL_TYPE', getenv('EMAIL_TYPE') ?: 'sendmail');

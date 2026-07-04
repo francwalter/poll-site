@@ -15,17 +15,56 @@ if (!$poll) die('Poll not found');
 $message = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Security::verifyCSRFToken($_POST['csrf_token'] ?? '');
+
+    // Check if we are updating password or poll settings
+    if (isset($_POST['new_password'])) {
+        $oldPassword = $_POST['old_password'] ?? '';
+        $newPassword = $_POST['new_password'] ?? '';
+
+        $currentHash = getAdminPasswordHash();
+        if (Security::verifyPassword($oldPassword, $currentHash)) {
+            $newHash = Security::hashPassword($newPassword);
+
+            // Update .env file
+            $envPath = __DIR__ . '/../.env';
+            if (file_exists($envPath)) {
+                $envContent = file_get_contents($envPath);
+                // Regex to replace ADMIN_PASSWORD_HASH=...
+                // Ensure the hash is properly written to the file without accidental character corruption
+                $escapedHash = str_replace('$', '\\$', $newHash);
+                $newEnvContent = preg_replace('/^ADMIN_PASSWORD_HASH=.*/m', 'ADMIN_PASSWORD_HASH=' . $escapedHash, $envContent, 1, $count);
+
+                if ($count === 0) {
+                    $newEnvContent = rtrim($envContent, "\r\n") . PHP_EOL . 'ADMIN_PASSWORD_HASH=' . $newHash . PHP_EOL;
+                }                if ($newEnvContent !== $envContent) {
+                    file_put_contents($envPath, $newEnvContent);
+
+                    // Clear internal cache/state if necessary
+                    putenv("ADMIN_PASSWORD_HASH=$newHash");
+
+                    $message = 'Password updated successfully.';
+                } else {
+                    $message = 'Error: Could not update .env file.';
+                }
+            } else {
+                $message = 'Error: .env file not found.';
+            }
+        } else {
+            $message = 'Incorrect current password.';
+        }
+    } else {
     $title = Security::sanitize($_POST['title'] ?? '');
     $description = Security::sanitize($_POST['description'] ?? '');
     $interval = intval($_POST['interval'] ?? 7);
     $clearDate = $_POST['clear_date'] ?? '';
-    
+
     $db->query(
         'UPDATE polls SET title = ?, description = ?, recurring_interval_days = ?, next_clear_date = ? WHERE id = ?',
         [':title' => $title, ':desc' => $description, ':interval' => $interval, ':date' => $clearDate, ':id' => $pollId]
     );
     $message = 'Updated successfully';
     $poll = $db->queryOne('SELECT * FROM polls WHERE id = ?', [':id' => $pollId]);
+}
 }
 
 $csrfToken = Security::generateCSRFToken();
@@ -54,7 +93,7 @@ $csrfToken = Security::generateCSRFToken();
     <div class="container mt-5">
         <h1><?php echo translate('poll_settings'); ?></h1>
         <?php if ($message): ?>
-            <div class="alert alert-success"><?php echo htmlspecialchars($message); ?></div>
+            <div class="alert alert-<?php echo strpos($message, 'Incorrect') !== false || strpos($message, 'Error:') !== false ? 'warning' : 'success'; ?>"><?php echo htmlspecialchars($message); ?></div>
         <?php endif; ?>
         <form method="POST" class="col-lg-8">
             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
@@ -76,6 +115,22 @@ $csrfToken = Security::generateCSRFToken();
             </div>
             <button type="submit" class="btn btn-primary"><?php echo translate('save'); ?></button>
             <a href="<?php echo BASE_PATH; ?>/admin/dashboard.php" class="btn btn-secondary"><?php echo translate('cancel'); ?></a>
+        </form>
+
+        <hr class="my-5">
+
+        <h3><?php echo translate('change_password'); ?></h3>
+        <form method="POST" class="col-lg-8">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
+            <div class="mb-3">
+                <label class="form-label"><?php echo translate('current_password'); ?></label>
+                <input type="password" class="form-control" name="old_password" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label"><?php echo translate('new_password'); ?></label>
+                <input type="password" class="form-control" name="new_password" required>
+            </div>
+            <button type="submit" class="btn btn-warning"><?php echo translate('update_password'); ?></button>
         </form>
     </div>
     <div class="position-fixed top-0 start-0 p-3">
