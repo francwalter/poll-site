@@ -8,12 +8,21 @@ require_once __DIR__ . '/includes/poll_maintenance.php';
 // session_start() is already called in config.php via session_id() check
 
 $db = Database::getInstance();
-$pollId = $_GET['id'] ?? 1;
-$poll = $db->queryOne('SELECT * FROM polls WHERE id = ? AND is_active = 1', [':id' => $pollId]);
+
+$slug = $_GET['slug'] ?? null;
+
+if ($slug) {
+    // Fetch by slug
+    $poll = $db->queryOne('SELECT * FROM polls WHERE slug = ? AND is_active = 1', [':slug' => $slug]);
+} else {
+    // Redirect to list if no slug
+    header('Location: ' . BASE_PATH . '/poll_list.php');
+    exit();
+}
 
 if ($poll) {
     perform_poll_clear($db, $poll);
-    $poll = $db->queryOne('SELECT * FROM polls WHERE id = ? AND is_active = 1', [':id' => $pollId]);
+    $poll = $db->queryOne('SELECT * FROM polls WHERE id = ? AND is_active = 1', [':id' => $poll['id']]);
 }
 
 if (!$poll) {
@@ -23,7 +32,7 @@ if (!$poll) {
 
 $entries = $db->queryAll(
     'SELECT * FROM entries WHERE poll_id = ? ORDER BY created_at DESC',
-    [':poll_id' => $pollId]
+    [':poll_id' => $poll['id']]
 );
 $csrfToken = Security::generateCSRFToken();
 ?>
@@ -60,7 +69,7 @@ $csrfToken = Security::generateCSRFToken();
                         <div class="card-body">
                             <form id="addEntryForm" method="POST" action="<?php echo BASE_PATH; ?>/api/add_entry.php">
                                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
-                                <input type="hidden" name="poll_id" value="<?php echo $pollId; ?>">
+                                <input type="hidden" name="poll_id" value="<?php echo $poll['id']; ?>">
 
                                 <div class="mb-3">
                                     <label for="name" class="form-label"><?php echo translate('your_name'); ?> *</label>

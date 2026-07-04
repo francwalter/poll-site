@@ -32,6 +32,7 @@ return [
     'save' => 'Save',
     'cancel' => 'Cancel',
     'poll_history' => 'Poll History',
+    'history' => 'History',
     'search' => 'Search',
     'cycle' => 'Cycle',
     'archived' => 'Archived',

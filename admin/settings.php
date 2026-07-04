@@ -54,13 +54,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } else {
     $title = Security::sanitize($_POST['title'] ?? '');
+    $slug = Security::sanitize($_POST['slug'] ?? '');
     $description = Security::sanitize($_POST['description'] ?? '');
     $interval = intval($_POST['interval'] ?? 7);
     $clearDate = $_POST['clear_date'] ?? '';
 
     $db->query(
-        'UPDATE polls SET title = ?, description = ?, recurring_interval_days = ?, next_clear_date = ? WHERE id = ?',
-        [':title' => $title, ':desc' => $description, ':interval' => $interval, ':date' => $clearDate, ':id' => $pollId]
+        'UPDATE polls SET title = ?, slug = ?, description = ?, recurring_interval_days = ?, next_clear_date = ? WHERE id = ?',
+        [':title' => $title, ':slug' => $slug, ':desc' => $description, ':interval' => $interval, ':date' => $clearDate, ':id' => $pollId]
     );
     $message = 'Updated successfully';
     $poll = $db->queryOne('SELECT * FROM polls WHERE id = ?', [':id' => $pollId]);
@@ -102,12 +103,16 @@ $csrfToken = Security::generateCSRFToken();
                 <input type="text" class="form-control" name="title" value="<?php echo htmlspecialchars($poll['title']); ?>" required>
             </div>
             <div class="mb-3">
+                <label class="form-label">Slug</label>
+                <input type="text" class="form-control" name="slug" value="<?php echo htmlspecialchars($poll['slug'] ?? ''); ?>" required>
+            </div>
+            <div class="mb-3">
                 <label class="form-label"><?php echo translate('poll_description'); ?></label>
                 <textarea class="form-control" name="description" rows="5"><?php echo htmlspecialchars($poll['description'] ?? ''); ?></textarea>
             </div>
             <div class="mb-3">
                 <label class="form-label"><?php echo translate('interval'); ?> (<?php echo translate('days'); ?>)</label>
-                <input type="number" class="form-control" name="interval" value="<?php echo $poll['recurring_interval_days']; ?>" min="1">
+                <input type="number" class="form-control" name="interval" value="<?php echo htmlspecialchars($poll['recurring_interval_days']); ?>" min="1">
             </div>
             <div class="mb-3">
                 <label class="form-label"><?php echo translate('clear_date'); ?></label>

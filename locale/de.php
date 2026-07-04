@@ -32,6 +32,7 @@ return [
     'save' => 'Speichern',
     'cancel' => 'Abbrechen',
     'poll_history' => 'Umfrageverlauf',
+    'history' => 'Verlauf',
     'search' => 'Suche',
     'cycle' => 'Zyklus',
     'archived' => 'Archiviert',
