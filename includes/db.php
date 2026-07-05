@@ -42,14 +42,30 @@ class Database
             title TEXT NOT NULL,
             description TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            next_clear_date DATE,
+            recurring_interval_days INTEGER DEFAULT 7,
             is_active BOOLEAN DEFAULT 1
         )');
 
-        // Add slug column for multi-poll site feature
-        $this->db->exec('ALTER TABLE polls ADD COLUMN slug TEXT');
+        // Add slug column for multi-poll site feature if it doesn't exist
+        $columns = $this->db->query('PRAGMA table_info(polls)');
+        $hasSlug = false;
+        while ($column = $columns->fetchArray(SQLITE3_ASSOC)) {
+            if ($column['name'] === 'slug') {
+                $hasSlug = true;
+                break;
+            }
+        }
 
-        // Check if slug column is unique, if not, make it unique
-        $result = $this->db->query("PRAGMA index_list('polls')");
+        if (!$hasSlug) {
+            $this->db->exec('ALTER TABLE polls ADD COLUMN slug TEXT');
+            // Populate existing polls with a generated slug
+            $this->generateSlugs();
+        }
+
+        // Check if slug index is unique, if not, make it unique
+        $result = $this->db->query('PRAGMA index_list("polls")');
         $hasUniqueSlugIndex = false;
             while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
             if ($row['name'] && strpos($row['name'], 'polls_slug_unique') !== false) {
@@ -86,19 +102,7 @@ class Database
             UNIQUE(poll_id, ip_address)
         )');
 
-        // Note: The following table definitions appear to be duplicates and should be reviewed
-        $this->db->exec('CREATE TABLE IF NOT EXISTS polls (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL,
-            description TEXT,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            next_clear_date DATE,
-            recurring_interval_days INTEGER DEFAULT 7,
-            is_active BOOLEAN DEFAULT 1
-        )');
-
-        $this->db->exec('CREATE TABLE IF NOT EXISTS entries (
+        $this->db->exec('CREATE TABLE IF NOT EXISTS participants (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             poll_id INTEGER NOT NULL,
             name TEXT NOT NULL,
@@ -130,22 +134,19 @@ class Database
         }
     }
 
+    private function createSlug($text) {
+        $text = strtolower($text);
+        $text = preg_replace('/[^a-z0-9]+/', '-', $text);
+        $text = trim($text, '-');
+        return $text ?: 'poll-' . uniqid();
+    }
+
     public function generateSlugs() {
         $polls = $this->queryAll('SELECT id, title FROM polls WHERE slug IS NULL OR slug = ""');
         foreach ($polls as $poll) {
             $slug = $this->createSlug($poll['title']);
             $this->query('UPDATE polls SET slug = ? WHERE id = ?', [$slug, $poll['id']]);
         }
-        // Re-create unique index after populating slugs to ensure uniqueness
-        $this->db->exec('DROP INDEX IF EXISTS polls_slug_unique');
-        $this->db->exec('CREATE UNIQUE INDEX IF NOT EXISTS polls_slug_unique ON polls(slug)');
-    }
-
-    private function createSlug($text) {
-        $text = strtolower($text);
-        $text = preg_replace('/[^a-z0-9]+/', '-', $text);
-        $text = trim($text, '-');
-        return $text ?: 'poll-' . uniqid();
     }
 
     public function query($sql, $params = []) {

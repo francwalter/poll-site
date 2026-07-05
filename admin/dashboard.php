@@ -142,6 +142,9 @@ $csrfToken = Security::generateCSRFToken();
         <div class="container">
             <a class="navbar-brand" href="<?php echo BASE_PATH; ?>/admin/dashboard.php">Poll Admin</a>
             <div class="d-flex">
+                <a class="btn btn-outline-light me-2" href="<?php echo BASE_PATH; ?>/admin/dashboard.php">Dashboard</a>
+                <a class="btn btn-outline-light me-2" href="<?php echo BASE_PATH; ?>/admin/settings.php"><?php echo translate('settings'); ?></a>
+                <a class="btn btn-outline-light me-2" href="<?php echo BASE_PATH; ?>/admin/history.php"><?php echo translate('history'); ?></a>
                 <a class="btn btn-outline-danger" href="<?php echo BASE_PATH; ?>/admin/logout.php">Logout</a>
             </div>
         </div>
@@ -164,11 +167,10 @@ $csrfToken = Security::generateCSRFToken();
             <tbody>
                 <?php foreach ($polls as $poll): ?>
                 <tr>
-                    <td><?php echo htmlspecialchars($poll['title']); ?></td>
+                    <td><a href="<?php echo BASE_PATH; ?>/<?php echo htmlspecialchars($poll['slug']); ?>" target="_blank"><?php echo htmlspecialchars($poll['title']); ?></a></td>
                     <td><code><?php echo htmlspecialchars($poll['slug']); ?></code></td>
                     <td>
                         <a href="<?php echo BASE_PATH; ?>/admin/dashboard.php?id=<?php echo $poll['id']; ?>" class="btn btn-sm btn-info">View Entries</a>
-                        <a href="<?php echo BASE_PATH; ?>/admin/settings.php?id=<?php echo $poll['id']; ?>" class="btn btn-sm btn-primary">Settings</a>
                     </td>
                 </tr>
                 <?php endforeach; ?>
