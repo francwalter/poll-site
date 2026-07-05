@@ -64,4 +64,13 @@ return [
     'error_updating_password' => 'Fehler beim Aktualisieren des Passworts.',
     'error_env_file_not_found' => 'Fehler: .env-Datei nicht gefunden.',
     'incorrect_current_password' => 'Falsches aktuelles Passwort.',
+    'mail_new_participant_subject' => 'Neuer Teilnehmer in {poll}',
+    'mail_new_participant_heading' => 'Benachrichtigung: Neuer Teilnehmer',
+    'mail_poll_label' => 'Umfrage',
+    'mail_greeting_with_new_participant' => 'Hallo {subscriber}, <strong>{participant}</strong> hat teilgenommen!',
+    'mail_participants_label' => 'Teilnehmer',
+    'mail_unsubscribe_label' => 'Abmelden',
+    'mail_delete_participation_label' => 'Meine Teilnahme an dieser Umfrage loeschen',
+    'invalid_link' => 'Ungueltiger Link',
+    'successfully_deleted_participation' => 'Ihre Teilnahme wurde erfolgreich geloescht.',
 ];

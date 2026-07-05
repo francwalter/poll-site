@@ -36,6 +36,8 @@ return [
     'search' => 'Search',
     'cycle' => 'Cycle',
     'archived' => 'Archived',
+    'unsubscribe' => 'Unsubscribe',
+    'successfully_unsubscribed' => 'Successfully unsubscribed',
     'change_password' => 'Change Password',
     'current_password' => 'Current Password',
     'new_password' => 'New Password',
@@ -44,5 +46,14 @@ return [
     'error_updating_password' => 'Error updating password.',
     'error_env_file_not_found' => 'Error: .env file not found.',
     'incorrect_current_password' => 'Incorrect current password.',
+    'mail_new_participant_subject' => 'New participant in {poll}',
+    'mail_new_participant_heading' => 'New Participant Alert',
+    'mail_poll_label' => 'Poll',
+    'mail_greeting_with_new_participant' => 'Hi {subscriber}, <strong>{participant}</strong> has joined!',
+    'mail_participants_label' => 'Participants',
+    'mail_unsubscribe_label' => 'Unsubscribe',
+    'mail_delete_participation_label' => 'Delete my participation in this poll',
+    'invalid_link' => 'Invalid link',
+    'successfully_deleted_participation' => 'Your participation was deleted successfully.',
     // Add more English translations as needed
 ];

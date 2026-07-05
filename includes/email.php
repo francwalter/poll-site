@@ -1,7 +1,13 @@
 <?php
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/i18n.php';
 
 class EmailService {
+    private static function t($key, array $replacements = []) {
+        $text = function_exists('translate') ? translate($key) : $key;
+        return empty($replacements) ? $text : strtr($text, $replacements);
+    }
+
     public static function send($to, $subject, $body, $isHtml = true) {
         if (!SMTP_ENABLED) return false;
         
@@ -86,7 +92,9 @@ class EmailService {
         
         $count = 0;
         foreach ($subscribers as $subscriber) {
-            $subject = "New participant in " . htmlspecialchars($poll['title']);
+            $subject = self::t('mail_new_participant_subject', [
+                '{poll}' => $poll['title']
+            ]);
             $body = self::buildNotificationEmail($poll, $newEntry, $entries, $subscriber);
             if (self::send($subscriber['email'], $subject, $body)) {
                 $count++;
@@ -100,18 +108,42 @@ class EmailService {
         foreach ($entries as $entry) {
             $entriesList .= '<li>' . htmlspecialchars($entry['name']) . '</li>';
         }
-        $unsubscribeLink = SITE_URL . '/api/unsubscribe.php?token=' . $subscriber['unsubscribe_token'];
+
+        $pollTitle = htmlspecialchars($poll['title']);
+        $subscriberName = htmlspecialchars($subscriber['name']);
+        $participantName = htmlspecialchars($newEntry['name']);
+        $mailLang = $_SESSION['lang'] ?? 'en';
+        if (!in_array($mailLang, ['en', 'de'], true)) {
+            $mailLang = 'en';
+        }
+
+        $token = rawurlencode($subscriber['unsubscribe_token']);
+        $lang = rawurlencode($mailLang);
+        $unsubscribeLink = SITE_URL . '/api/unsubscribe.php?token=' . $token . '&lang=' . $lang;
+        $deleteParticipationLink = SITE_URL . '/api/delete_participation.php?token=' . $token . '&lang=' . $lang;
+
+        $heading = self::t('mail_new_participant_heading');
+        $pollLabel = self::t('mail_poll_label');
+        $greeting = self::t('mail_greeting_with_new_participant', [
+            '{subscriber}' => $subscriberName,
+            '{participant}' => $participantName
+        ]);
+        $participantsLabel = self::t('mail_participants_label');
+        $unsubscribeLabel = self::t('mail_unsubscribe_label');
+        $deleteParticipationLabel = self::t('mail_delete_participation_label');
+
         return <<<HTML
 <!DOCTYPE html>
 <html>
 <head><meta charset="UTF-8"></head>
 <body>
-<h2>New Participant Alert</h2>
-<p>Poll: <strong>{$poll['title']}</strong></p>
-<p>Hi {$subscriber['name']}, <strong>{$newEntry['name']}</strong> has joined!</p>
-<h3>Participants:</h3>
+<h2>{$heading}</h2>
+<p>{$pollLabel}: <strong>{$pollTitle}</strong></p>
+<p>{$greeting}</p>
+<h3>{$participantsLabel}</h3>
 <ul>$entriesList</ul>
-<p><a href="$unsubscribeLink">Unsubscribe</a></p>
+<p><a href="$unsubscribeLink">{$unsubscribeLabel}</a></p>
+<p><a href="$deleteParticipationLink">{$deleteParticipationLabel}</a></p>
 </body>
 </html>
 HTML;
