@@ -78,7 +78,7 @@ $csrfToken = Security::generateCSRFToken();
                                     <tr>
                                         <td><?php echo htmlspecialchars($entry['name']); ?></td>
                                         <td><?php echo htmlspecialchars($entry['email'] ?? '-'); ?></td>
-                                        <td><?php echo date('M d, Y', strtotime($entry['created_at'])); ?></td>
+                                        <td><?php echo date('M d, Y H:i', strtotime($entry['created_at'])); ?></td>
                                         <td>
                                             <form method="POST" action="<?php echo BASE_PATH; ?>/api/delete_entry.php" style="display:inline;">
                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">

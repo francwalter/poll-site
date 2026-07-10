@@ -4,12 +4,31 @@ require_once __DIR__ . '/includes/db.php';
 require_once __DIR__ . '/includes/security.php';
 require_once __DIR__ . '/includes/i18n.php';
 require_once __DIR__ . '/includes/poll_maintenance.php';
+require_once __DIR__ . '/includes/email.php';
 
 // session_start() is already called in config.php via session_id() check
 
 $db = Database::getInstance();
 
 $slug = $_GET['slug'] ?? null;
+
+if (!$slug) {
+    $requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?: '';
+    $normalizedPath = trim($requestPath, '/');
+    $normalizedBasePath = trim(BASE_PATH, '/');
+
+    if ($normalizedBasePath !== '') {
+        if ($normalizedPath === $normalizedBasePath) {
+            $normalizedPath = '';
+        } elseif (strpos($normalizedPath, $normalizedBasePath . '/') === 0) {
+            $normalizedPath = substr($normalizedPath, strlen($normalizedBasePath) + 1);
+        }
+    }
+
+    if (preg_match('#^([a-zA-Z0-9_-]+)(?:/index\.php)?$#', $normalizedPath, $matches)) {
+        $slug = $matches[1];
+    }
+}
 
 if ($slug) {
     // Fetch by slug
@@ -26,9 +45,70 @@ if ($poll) {
 }
 
 if (!$poll) {
+    if (isset($_GET['name'])) {
+        header('Content-Type: application/json; charset=utf-8');
+        http_response_code(404);
+        echo json_encode(['error' => 'Poll not found']);
+        exit();
+    }
     header('Location: admin/login.php');
     exit();
 }
+
+if (isset($_GET['name'])) {
+    header('Content-Type: application/json; charset=utf-8');
+
+    $name = Security::sanitize($_GET['name'] ?? '');
+    $email = Security::sanitize($_GET['email'] ?? '');
+
+    if (empty($name)) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Name required']);
+        exit();
+    }
+
+    if (!Security::validateName($name)) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Name must contain only letters and numbers without spaces']);
+        exit();
+    }
+
+    if (!empty($email) && !Security::validateEmail($email)) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Invalid email']);
+        exit();
+    }
+
+    $subscribe = !empty($email) ? 1 : 0;
+
+    $unsubscribeToken = null;
+    if ($subscribe) {
+        $unsubscribeToken = Security::generateUnsubscribeToken();
+    }
+
+    $db->query(
+        'INSERT INTO entries (poll_id, name, email, subscribed, unsubscribe_token) VALUES (?, ?, ?, ?, ?)',
+        [':poll_id' => $poll['id'], ':name' => $name, ':email' => !empty($email) ? $email : null, ':subscribed' => $subscribe, ':token' => $unsubscribeToken]
+    );
+
+    $entryId = $db->lastInsertId();
+    $entry = $db->queryOne('SELECT * FROM entries WHERE id = ?', [':id' => $entryId]);
+    if ($entry) {
+        EmailService::notifySubscribers($poll['id'], $entry);
+    }
+
+    http_response_code(201);
+    echo json_encode(['success' => true, 'entry_id' => $entryId, 'poll_slug' => $slug]);
+    exit();
+}
+
+$clearDateDisplay = '-';
+if (!empty($poll['next_clear_date'])) {
+    $clearDateDisplay = date('d.m.Y', strtotime($poll['next_clear_date']));
+}
+$intervalDays = (int)($poll['recurring_interval_days'] ?? 0);
+$intervalUnit = $intervalDays === 1 ? translate('day') : translate('days');
+
 
 $entries = $db->queryAll(
     'SELECT * FROM entries WHERE poll_id = ? ORDER BY created_at DESC',
@@ -60,6 +140,14 @@ $csrfToken = Security::generateCSRFToken();
                             <?php if ($poll['description']): ?>
                                 <p class="card-text"><?php echo htmlspecialchars($poll['description']); ?></p>
                             <?php endif; ?>
+                            <div class="d-flex flex-wrap gap-2 mt-3">
+                                <span class="badge bg-primary fs-6 px-3 py-2">
+                                    <?php echo translate('interval'); ?>: <?php echo $intervalDays; ?> <?php echo $intervalUnit; ?>
+                                </span>
+                                <span class="badge bg-info text-dark fs-6 px-3 py-2">
+                                    <?php echo translate('clear_date'); ?>: <?php echo htmlspecialchars($clearDateDisplay); ?>
+                                </span>
+                            </div>
                         </div>
                     </div>
                     <div class="card mb-4">
@@ -73,7 +161,7 @@ $csrfToken = Security::generateCSRFToken();
 
                                 <div class="mb-3">
                                     <label for="name" class="form-label"><?php echo translate('your_name'); ?> *</label>
-                                    <input type="text" class="form-control" id="name" name="name" required>
+                                    <input type="text" class="form-control" id="name" name="name" required pattern="[A-Za-z0-9]+" title="Only letters and numbers, no spaces">
                                 </div>
 
                                 <div class="mb-3">
@@ -81,10 +169,6 @@ $csrfToken = Security::generateCSRFToken();
                                     <input type="email" class="form-control" id="email" name="email">
                                 </div>
 
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="subscribe" name="subscribe" value="1">
-                                    <label class="form-check-label" for="subscribe"><?php echo translate('receive_email_notifications'); ?></label>
-                                </div>
 
                                 <button type="submit" class="btn btn-primary"><?php echo translate('join_poll'); ?></button>
                             </form>

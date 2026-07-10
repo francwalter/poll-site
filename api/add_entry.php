@@ -21,11 +21,17 @@ if (!isset($_POST['csrf_token']) || !Security::verifyCSRFToken($_POST['csrf_toke
 $pollId = intval($_POST['poll_id'] ?? 0);
 $name = Security::sanitize($_POST['name'] ?? '');
 $email = Security::sanitize($_POST['email'] ?? '');
-$subscribe = isset($_POST['subscribe']) ? 1 : 0;
+$subscribe = 0; // will be set automatically if email is valid
 
 if (empty($name)) {
     http_response_code(400);
     echo json_encode(['error' => 'Name required']);
+    exit();
+}
+
+if (!Security::validateName($name)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Name must contain only letters and numbers without spaces']);
     exit();
 }
 
@@ -44,7 +50,8 @@ if (!$poll) {
 }
 
 $unsubscribeToken = null;
-if (!empty($email) && $subscribe) {
+if (!empty($email) && Security::validateEmail($email)) {
+    $subscribe = 1;
     $unsubscribeToken = Security::generateUnsubscribeToken();
 }
 

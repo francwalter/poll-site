@@ -16,6 +16,41 @@ function initTheme() {
     }
 }
 
+function showToast(message, type = 'success') {
+    let container = document.getElementById('toastContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container position-fixed top-50 start-50 translate-middle p-3';
+        container.style.zIndex = '1080';
+        document.body.appendChild(container);
+    }
+
+    const toastEl = document.createElement('div');
+    toastEl.className = 'toast align-items-center text-white bg-' + type + ' border-0 fs-5 shadow-lg rounded-3';
+    toastEl.style.minWidth = '360px';
+    toastEl.style.maxWidth = '90vw';
+    toastEl.setAttribute('role', 'alert');
+    toastEl.setAttribute('aria-live', 'assertive');
+    toastEl.setAttribute('aria-atomic', 'true');
+
+    toastEl.innerHTML = '<div class="d-flex">'
+        + '<div class="toast-body">' + message + '</div>'
+        + '<button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>'
+        + '</div>';
+
+    container.appendChild(toastEl);
+
+    if (window.bootstrap && window.bootstrap.Toast) {
+        const toast = new window.bootstrap.Toast(toastEl, { delay: 3200 });
+        toast.show();
+        toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
+    } else {
+        alert(message);
+        toastEl.remove();
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     initTheme();
     const form = document.getElementById('addEntryForm');
@@ -27,14 +62,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(r => r.json())
                 .then(d => {
                     if (d.success) {
-                        alert('Added!');
+                        showToast('Added!', 'success');
                         form.reset();
-                        location.reload();
+                        setTimeout(() => location.reload(), 3400);
                     } else {
                         alert('Error: ' + d.error);
                     }
                 })
-                .catch(e => alert('Error'));
+                .catch(() => alert('Error'));
         });
     }
 });

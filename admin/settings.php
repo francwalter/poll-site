@@ -103,7 +103,7 @@ $csrfToken = Security::generateCSRFToken();
                 <input type="text" class="form-control" name="title" value="<?php echo htmlspecialchars($poll['title']); ?>" required>
             </div>
             <div class="mb-3">
-                <label class="form-label">Slug</label>
+                <label class="form-label"><?php echo translate('slug'); ?></label>
                 <input type="text" class="form-control" name="slug" value="<?php echo htmlspecialchars($poll['slug'] ?? ''); ?>" required>
             </div>
             <div class="mb-3">

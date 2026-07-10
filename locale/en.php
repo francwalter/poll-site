@@ -4,9 +4,9 @@ return [
     'poll_description' => 'Poll Description',
     'join_the_poll' => 'Join the Poll',
     'your_name' => 'Your Name',
-    'email_optional' => 'Email (optional)',
+    'email_optional' => 'Email (for notifications, optional)',
     'receive_email_notifications' => 'Receive email notifications',
-    'join_poll' => 'Join Poll',
+    'join_poll' => 'Join',
     'participants' => 'Participants',
     'no_participants_yet' => 'No participants yet.',
     'dark_mode' => 'Dark Mode',
@@ -22,6 +22,7 @@ return [
     'settings' => 'Settings',
     'clear_date' => 'Clear Date',
     'interval' => 'Interval',
+    'day' => 'day',
     'days' => 'days',
     'admin_login' => 'Admin Login',
     'username' => 'Username',
@@ -55,5 +56,5 @@ return [
     'mail_delete_participation_label' => 'Delete my participation in this poll',
     'invalid_link' => 'Invalid link',
     'successfully_deleted_participation' => 'Your participation was deleted successfully.',
-    // Add more English translations as needed
+    'slug' => 'Slug',
 ];

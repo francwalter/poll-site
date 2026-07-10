@@ -22,6 +22,11 @@ class Security {
     public static function validateEmail($email) {
         return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
     }
+
+    public static function validateName($name) {
+        // Allow only letters and digits (Unicode aware), no spaces or symbols.
+        return preg_match('/^[\\p{L}\\p{N}]+$/u', $name) === 1;
+    }
     
     public static function generateUnsubscribeToken() {
         return bin2hex(random_bytes(32));
