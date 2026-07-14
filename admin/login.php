@@ -61,6 +61,7 @@ $csrfToken = Security::generateCSRFToken();
     <div class="position-fixed top-0 start-0 p-3">
         <a href="<?php echo BASE_PATH; ?>/set_language.php?lang=en" class="btn btn-sm btn-outline-secondary">EN</a>
         <a href="<?php echo BASE_PATH; ?>/set_language.php?lang=de" class="btn btn-sm btn-outline-secondary">DE</a>
+        <a href="<?php echo BASE_PATH; ?>/admin/login.php" class="btn btn-sm btn-outline-secondary"><?php echo translate('admin_login_link'); ?></a>
     </div>
     <div class="position-fixed bottom-0 end-0 p-3">
         <button id="themeToggle" class="btn btn-sm btn-outline-secondary" onclick="toggleTheme()"><?php echo translate('dark_mode'); ?></button>

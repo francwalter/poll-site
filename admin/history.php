@@ -41,14 +41,15 @@ $archived = $db->queryAll(
     <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/assets/css/style.css">
 </head>
 <body>
-    <nav class="navbar navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="<?php echo BASE_PATH; ?>/admin/dashboard.php">Poll Admin</a>
-            <div class="d-flex">
-                <a class="btn btn-outline-light me-2" href="<?php echo BASE_PATH; ?>/admin/dashboard.php">Dashboard</a>
-                <a class="btn btn-outline-light me-2" href="<?php echo BASE_PATH; ?>/admin/settings.php">Settings</a>
-                <a class="btn btn-outline-light me-2" href="<?php echo BASE_PATH; ?>/admin/history.php">History</a>
-                <a class="btn btn-outline-danger" href="<?php echo BASE_PATH; ?>/admin/logout.php">Logout</a>
+    <nav class="navbar navbar-dark bg-dark mb-4">
+        <div class="container position-relative flex-wrap">
+            <a class="navbar-brand position-absolute start-50 translate-middle-x d-none d-md-block" href="<?php echo BASE_PATH; ?>/admin/dashboard.php"><?php echo translate('poll_admin'); ?></a>
+            <a class="navbar-brand w-100 text-center d-md-none mb-2" href="<?php echo BASE_PATH; ?>/admin/dashboard.php"><?php echo translate('poll_admin'); ?></a>
+            <div class="d-flex flex-wrap gap-2 ms-auto justify-content-end">
+                <a class="btn btn-sm btn-outline-light" href="<?php echo BASE_PATH; ?>/admin/dashboard.php"><?php echo translate('dashboard'); ?></a>
+                <a class="btn btn-sm btn-outline-light" href="<?php echo BASE_PATH; ?>/admin/settings.php?id=<?php echo $pollId; ?>"><?php echo translate('settings'); ?></a>
+                <a class="btn btn-sm btn-outline-light" href="<?php echo BASE_PATH; ?>/admin/history.php?id=<?php echo $pollId; ?>"><?php echo translate('history'); ?></a>
+                <a class="btn btn-sm btn-outline-danger" href="<?php echo BASE_PATH; ?>/admin/logout.php"><?php echo translate('logout'); ?></a>
             </div>
         </div>
     </nav>
